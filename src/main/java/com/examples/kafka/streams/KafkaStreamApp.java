@@ -9,15 +9,16 @@ import static com.examples.kafka.streams.utils.KafkaWindowsUtils.deleteTemporalF
 
 public class KafkaStreamApp {
 
-    private final static String applicationId = "KafkaStreamApp";
-    private final static String clientIdConfig = "MyClientIdConfig";
+    private final static String applicationId = "KafkaStreamApps";
+    private final static String clientIdConfig = "MyClientIdConfiguration";
     private final static String bootstrapServers = "localhost:9092";
     private final static String inputTopic = "my-topic";
+    private final static String outputTopic = "my-topic-out";
 
 
     public static void main(String[] args) {
         final KafkaStreamExample kafkaStreamExample = new KafkaStreamExample();
-        final StreamsBuilder builder = kafkaStreamExample.createTopology(inputTopic);
+        final StreamsBuilder builder = kafkaStreamExample.createTopology(inputTopic, outputTopic);
 
         deleteTemporalFolderIfWindows(applicationId);
 

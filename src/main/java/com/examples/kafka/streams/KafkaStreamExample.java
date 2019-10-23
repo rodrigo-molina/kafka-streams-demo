@@ -5,6 +5,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Predicate;
+import org.apache.kafka.streams.kstream.Produced;
 
 import static com.examples.kafka.streams.utils.KafkaUtils.STRING_SERDES;
 import static com.examples.kafka.streams.utils.KafkaUtils.printValueForStep;
@@ -13,14 +14,15 @@ public class KafkaStreamExample {
 
     private final StreamsBuilder builder = new StreamsBuilder();
 
-    public StreamsBuilder createTopology(final String inputTopic) {
+    public StreamsBuilder createTopology(final String inputTopic, final String outputTopic) {
 
         builder.stream(inputTopic, Consumed.with(STRING_SERDES, STRING_SERDES))
                 .peek(printValueForStep("EVENT RECEIVED"))
                 .map(uppercaseValue)
                 .peek(printValueForStep("EVENT MAPPED TO UPPERCASE"))
                 .filter(isValueLengthEven)
-                .peek(printValueForStep("EVENT FILTERED"));
+                .peek(printValueForStep("EVENT FILTERED"))
+                .to(outputTopic, Produced.with(STRING_SERDES, STRING_SERDES));
 
         return builder;
     }
