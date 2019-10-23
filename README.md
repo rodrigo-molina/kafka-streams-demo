@@ -5,3 +5,8 @@
 $ cd  .\src\test\resources
 $ docker-compose up
 ```
+
+## Run App
+```
+$ gradle run
+```
