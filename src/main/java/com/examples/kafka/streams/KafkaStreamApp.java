@@ -2,9 +2,12 @@ package com.examples.kafka.streams;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.ForeachAction;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -30,8 +33,14 @@ public class KafkaStreamApp {
 
         final StreamsBuilder builder = new StreamsBuilder();
 
-        builder.stream("my-topic")
-                .peek((key, value) -> LOGGER.info(format("Key: %s , Value: %s", key, value)));
+        ForeachAction<Object, Object> writeOut = (key, value) -> LOGGER.info(format("Key: %s , Value: %s", key, value));
+
+        builder.stream("my-topic", Consumed.with(Serdes.String(), Serdes.String()))
+                .peek(writeOut)
+                .map((key, value) -> KeyValue.pair(key, value.toUpperCase()))
+                .peek(writeOut)
+                .filter((key, value) -> value.length() % 2 == 0)
+                .peek(writeOut);
 
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
