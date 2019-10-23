@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+mainClassName = 'App'
+
+dependencies {
+    implementation 'com.google.guava:guava:23.0'
+    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.0'
+
+    testImplementation group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0'
+    testImplementation 'junit:junit:4.12'
+}
+
+repositories {
+    jcenter()
+}
