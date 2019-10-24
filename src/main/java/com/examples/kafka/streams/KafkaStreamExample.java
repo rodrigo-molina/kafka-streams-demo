@@ -14,7 +14,7 @@ public class KafkaStreamExample {
 
     private final StreamsBuilder builder = new StreamsBuilder();
 
-    public StreamsBuilder createTopology(final String inputTopic, final String outputTopic) {
+    public StreamsBuilder createStream(final String inputTopic, final String outputTopic) {
 
         builder.stream(inputTopic, Consumed.with(STRING_SERDES, STRING_SERDES))
                 .peek(printValueForStep("EVENT RECEIVED"))

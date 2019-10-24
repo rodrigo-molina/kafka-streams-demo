@@ -4,7 +4,6 @@ import com.examples.kafka.streams.utils.YamlLoader;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.test.ConsumerRecordFactory;
@@ -15,33 +14,26 @@ import org.junit.Test;
 
 import java.util.Properties;
 import java.util.Random;
+import java.util.function.BiConsumer;
 
-import static com.examples.kafka.streams.utils.KafkaWindowsUtils.deleteTemporalFolderIfWindows;
 import static org.apache.kafka.streams.StreamsConfig.STATE_DIR_CONFIG;
 
 public class KafkaStreamAppTest {
     public static final String STATE_DIRECTORY = "test-garbage";
+    public static final String TEST_RESOURCES_APPLICATION_YAML = "src/test/resources/application.yaml";
 
     private TopologyTestDriver testDriver;
-    private KafkaConfigurationProperties kafkaConfigurationProperties;
+    private KafkaConfigurationProperties kafkaConfigurationProperties = new YamlLoader().readYaml(TEST_RESOURCES_APPLICATION_YAML, KafkaConfigurationProperties.class);
 
     @Before
     public void setUp() {
-        final YamlLoader yamlLoader = new YamlLoader();
-        kafkaConfigurationProperties = yamlLoader.readYaml("src/test/resources/application.yaml", KafkaConfigurationProperties.class);
+        final BiConsumer<Properties, Topology> runTopology = (streamsConfiguration, topology) -> {
+            streamsConfiguration.setProperty(STATE_DIR_CONFIG, STATE_DIRECTORY + "/test-state" + (new Random()).nextInt()); // only for testing reasons
 
-        final KafkaStreamExample kafkaStreamExample = new KafkaStreamExample();
-        final StreamsBuilder builder = kafkaStreamExample.createTopology(kafkaConfigurationProperties.getInputTopic(), kafkaConfigurationProperties.getOutputTopic());
+            testDriver = new TopologyTestDriver(topology, streamsConfiguration);
+        };
 
-        deleteTemporalFolderIfWindows(kafkaConfigurationProperties.getApplicationId());
-
-        final Properties streamsConfiguration = KafkaPropertiesBuilder.build(kafkaConfigurationProperties.getApplicationId(), kafkaConfigurationProperties.getClientIdConfig(), kafkaConfigurationProperties.getBootstrapServers());
-        streamsConfiguration.setProperty(STATE_DIR_CONFIG, STATE_DIRECTORY + "/test-state" + (new Random()).nextInt()); // only for testing reasons
-
-        final Topology topology = builder.build();
-        System.out.println(topology.describe());
-        testDriver = new TopologyTestDriver(topology, streamsConfiguration);
-
+        KafkaStreamApp.runApp(TEST_RESOURCES_APPLICATION_YAML, runTopology);
     }
 
     @Test
@@ -64,13 +56,13 @@ public class KafkaStreamAppTest {
         thenNoMessageIsPublishedInTopic(kafkaConfigurationProperties.getOutputTopic());
     }
 
-    private void whenMessageIsProcessed() {
-        // do nothing! It's already declared
-    }
-
 
     public ConsumerRecordFactory givenConsumer(String topic) {
         return new ConsumerRecordFactory(topic, new StringSerializer(), new StringSerializer());
+    }
+
+    private void whenMessageIsProcessed() {
+        // do nothing! It's already running
     }
 
     public <Z, T> void givenTopicMessage(ConsumerRecordFactory<Z, T> consumerFactory, String topic, Z key, T message) {
