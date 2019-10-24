@@ -9,6 +9,8 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.test.ConsumerRecordFactory;
 import org.apache.kafka.streams.test.OutputVerifier;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -21,11 +23,12 @@ public class KafkaStreamAppTest {
     public static final String STATE_DIRECTORY = "test-garbage";
 
     private TopologyTestDriver testDriver;
+    private KafkaConfigurationProperties kafkaConfigurationProperties;
 
-    @Test
-    public void a() {
+    @Before
+    public void setUp() {
         final YamlLoader yamlLoader = new YamlLoader();
-        final KafkaConfigurationProperties kafkaConfigurationProperties = yamlLoader.readYaml("src/test/resources/application.yaml", KafkaConfigurationProperties.class);
+        kafkaConfigurationProperties = yamlLoader.readYaml("src/test/resources/application.yaml", KafkaConfigurationProperties.class);
 
         final KafkaStreamExample kafkaStreamExample = new KafkaStreamExample();
         final StreamsBuilder builder = kafkaStreamExample.createTopology(kafkaConfigurationProperties.getInputTopic(), kafkaConfigurationProperties.getOutputTopic());
@@ -39,11 +42,30 @@ public class KafkaStreamAppTest {
         System.out.println(topology.describe());
         testDriver = new TopologyTestDriver(topology, streamsConfiguration);
 
+    }
+
+    @Test
+    public void it_should_publish_upper_case_message() {
         ConsumerRecordFactory record = givenConsumer(kafkaConfigurationProperties.getInputTopic());
         givenTopicMessage(record, kafkaConfigurationProperties.getInputTopic(), "key", "Pepe");
+
+        whenMessageIsProcessed();
+
         thenAMessageIsPublishedInTopic(kafkaConfigurationProperties.getOutputTopic(), "key", "PEPE");
+    }
 
+    @Test
+    public void it_should_not_publish_message_when_odd_input_length() {
+        ConsumerRecordFactory record = givenConsumer(kafkaConfigurationProperties.getInputTopic());
+        givenTopicMessage(record, kafkaConfigurationProperties.getInputTopic(), "key", "Test me");
 
+        whenMessageIsProcessed();
+
+        thenNoMessageIsPublishedInTopic(kafkaConfigurationProperties.getOutputTopic());
+    }
+
+    private void whenMessageIsProcessed() {
+        // do nothing! It's already declared
     }
 
 
@@ -58,5 +80,9 @@ public class KafkaStreamAppTest {
     public void thenAMessageIsPublishedInTopic(String topic, String key, String message) {
         ProducerRecord<String, String> outputRecord = testDriver.readOutput(topic, new StringDeserializer(), new StringDeserializer());
         OutputVerifier.compareKeyValue(outputRecord, key, message);
+    }
+
+    public void thenNoMessageIsPublishedInTopic(String topic) {
+        Assert.assertNull(testDriver.readOutput(topic, new StringDeserializer(), new StringDeserializer()));
     }
 }
