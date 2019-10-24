@@ -1,5 +1,5 @@
 applicationId: TestKafkaStreamApps
 clientIdConfig: TestMyClientIdConfiguration
-bootstrapServers: localhost:9092
+bootstrapServers: dummy:9092
 inputTopic: my-topic
 outputTopic: my-topic-out

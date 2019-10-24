@@ -15,7 +15,7 @@ public class YamlLoaderTest {
         assertEquals(new KafkaConfigurationProperties(
                 "TestKafkaStreamApps",
                 "TestMyClientIdConfiguration",
-                "localhost:9092",
+                "dummy:9092",
                 "my-topic",
                 "my-topic-out"), mappedConfig);
     }
