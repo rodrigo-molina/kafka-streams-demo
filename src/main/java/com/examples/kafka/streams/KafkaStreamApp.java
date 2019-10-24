@@ -1,5 +1,6 @@
 package com.examples.kafka.streams;
 
+import com.examples.kafka.streams.utils.YamlLoader;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 
@@ -9,20 +10,16 @@ import static com.examples.kafka.streams.utils.KafkaWindowsUtils.deleteTemporalF
 
 public class KafkaStreamApp {
 
-    private final static String applicationId = "KafkaStreamApps";
-    private final static String clientIdConfig = "MyClientIdConfiguration";
-    private final static String bootstrapServers = "localhost:9092";
-    private final static String inputTopic = "my-topic";
-    private final static String outputTopic = "my-topic-out";
-
-
     public static void main(String[] args) {
+        final YamlLoader yamlLoader = new YamlLoader();
+        final KafkaConfigurationProperties kafkaConfigurationProperties = yamlLoader.readYaml("src/main/resources/application.yaml", KafkaConfigurationProperties.class);
+
         final KafkaStreamExample kafkaStreamExample = new KafkaStreamExample();
-        final StreamsBuilder builder = kafkaStreamExample.createTopology(inputTopic, outputTopic);
+        final StreamsBuilder builder = kafkaStreamExample.createTopology(kafkaConfigurationProperties.getInputTopic(), kafkaConfigurationProperties.getOutputTopic());
 
-        deleteTemporalFolderIfWindows(applicationId);
+        deleteTemporalFolderIfWindows(kafkaConfigurationProperties.getApplicationId());
 
-        final Properties streamsConfiguration = KafkaPropertiesBuilder.build(applicationId, clientIdConfig, bootstrapServers);
+        final Properties streamsConfiguration = KafkaPropertiesBuilder.build(kafkaConfigurationProperties.getApplicationId(), kafkaConfigurationProperties.getClientIdConfig(), kafkaConfigurationProperties.getBootstrapServers());
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close)); // Add shutdown hook to stop the Kafka Streams threads.

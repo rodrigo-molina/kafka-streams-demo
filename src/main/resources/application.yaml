@@ -1,0 +1,5 @@
+applicationId: KafkaStreamApps
+clientIdConfig: MyClientIdConfiguration
+bootstrapServers: localhost:9092
+inputTopic: my-topic
+outputTopic: my-topic-out
