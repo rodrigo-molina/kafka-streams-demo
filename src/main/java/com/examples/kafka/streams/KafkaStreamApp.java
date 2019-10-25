@@ -22,7 +22,7 @@ public class KafkaStreamApp {
             streams.start();
         };
 
-        runApp("src/main/resources/application.yaml", runTopology);
+        runApp("./src/main/resources/application.yaml", runTopology);
     }
 
     public static void runApp(final String yamlFile, final BiConsumer<Properties, Topology> runTopology) {

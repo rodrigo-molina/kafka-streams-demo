@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id "com.bmuschko.docker-remote-api" version "5.2.0"
 }
 
 mainClassName = 'com.examples.kafka.streams.KafkaStreamApp'
@@ -17,7 +18,6 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 
-
 dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.28'
@@ -28,8 +28,32 @@ dependencies {
 
     testImplementation group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0'
     testImplementation 'junit:junit:4.12'
+
 }
 
 repositories {
     jcenter()
+}
+
+// Docker Support
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+task buildImage(type: DockerBuildImage) {
+    dependsOn jar
+    inputDir = file('.')
+    dockerFile = file('Dockerfile')
+    tags.add(rootProject.name)
+}
+
+task createContainer(type: DockerCreateContainer) {
+    dependsOn buildImage
+    targetImageId buildImage.getImageId()
+    autoRemove = true
+}
+
+task startContainer(type: DockerStartContainer) {
+    dependsOn createContainer
+    targetContainerId createContainer.getContainerId()
 }

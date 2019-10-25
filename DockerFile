@@ -1,0 +1,5 @@
+FROM adoptopenjdk/openjdk8:alpine-slim
+VOLUME /tmp
+ADD src/main/resources src/main/resources
+ADD build/libs/kafka-streams-demo.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
