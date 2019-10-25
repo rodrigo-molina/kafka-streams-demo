@@ -17,3 +17,9 @@ $ gradle run
 $ gradle jar
 $ java -jar build/libs/kafka-streams-demo.jar
 ```
+
+
+## Run Docker container
+```
+$ gradle startContainer
+```
