@@ -5,17 +5,20 @@ plugins {
 }
 
 mainClassName = 'com.examples.kafka.streams.KafkaStreamApp'
+version = '0.0.1'
 
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.compilerArgs << '-parameters'
+}
 jar {
+
     manifest {
         attributes 'Main-Class': 'com.examples.kafka.streams.KafkaStreamApp'
     } from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-}
-
-compileJava {
-    options.compilerArgs << '-parameters'
 }
 
 dependencies {
@@ -28,7 +31,6 @@ dependencies {
 
     testImplementation group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0'
     testImplementation 'junit:junit:4.12'
-
 }
 
 repositories {
@@ -44,12 +46,13 @@ task buildImage(type: DockerBuildImage) {
     dependsOn jar
     inputDir = file('.')
     dockerFile = file('Dockerfile')
-    tags.add(rootProject.name)
+    tags.add("${rootProject.name}:${version}")
 }
 
 task createContainer(type: DockerCreateContainer) {
     dependsOn buildImage
     targetImageId buildImage.getImageId()
+    containerName = "kafka_streams_demo_${version}"
     autoRemove = true
 }
 
