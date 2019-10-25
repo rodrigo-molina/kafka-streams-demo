@@ -13,7 +13,6 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 jar {
-
     manifest {
         attributes 'Main-Class': 'com.examples.kafka.streams.KafkaStreamApp'
     } from {
@@ -38,8 +37,8 @@ repositories {
 }
 
 // Docker Support
-import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 task buildImage(type: DockerBuildImage) {
