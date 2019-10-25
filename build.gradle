@@ -46,6 +46,7 @@ task buildImage(type: DockerBuildImage) {
     dependsOn jar
     inputDir = file('.')
     dockerFile = file('Dockerfile')
+    buildArgs = ["JAR_FILE": jar.getArchiveName()]
     tags.add("${rootProject.name}:${version}")
 }
 
