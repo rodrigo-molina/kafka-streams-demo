@@ -15,7 +15,7 @@ $ gradle run
 ## Run App java -jar
 ```
 $ gradle jar
-$ java -jar build/libs/kafka-streams-demo.jar
+$ java -jar build/libs/kafka-streams-demo-0.0.1.jar
 ```
 
 
