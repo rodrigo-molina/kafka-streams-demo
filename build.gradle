@@ -55,6 +55,7 @@ task createContainer(type: DockerCreateContainer) {
     targetImageId buildImage.getImageId()
     containerName = "kafka_streams_demo_${version}"
     autoRemove = true
+    network = "host" // to run it locally and connect to kafka's docker compose
 }
 
 task startContainer(type: DockerStartContainer) {
